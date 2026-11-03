@@ -1,0 +1,52 @@
+# =====================================
+# DATASETS - DO NOT COMMIT
+# =====================================
+/data/
+
+# =====================================
+# PYTHON
+# =====================================
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+receipt_venv/
+receipt_env/
+.venv/
+venv/
+env/
+ENV/
+.conda/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs and cache
+*.log
+logs/
+.cache/
+cache/
+tmp/
+temp/
+
+# Model checkpoints
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.safetensors/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

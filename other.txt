@@ -1,0 +1,72 @@
+receipt-restoration-multimodal/
+│
+├── README.md
+├── .gitignore
+├── requirements.txt
+├── pyproject.toml
+│
+├── configs/
+│   ├── dataset.yaml
+│   ├── augmentation.yaml
+│   └── split.yaml
+│
+├── schemas/
+│   └── receipt.schema.json
+│
+├── data/
+│   ├── raw/
+│   │   ├── mc_ocr_2021/
+│   │   ├── cord/
+│   │   ├── sroie/
+│   │   └── uit_mlreceipts/
+│   │
+│   ├── interim/
+│   ├── annotations/
+│   ├── processed/
+│   ├── paired/
+│   └── splits/
+│
+├── src/
+│   ├── receipt_dataset/
+│   │   ├── __init__.py
+│   │   ├── adapters/
+│   │   ├── normalization/
+│   │   ├── annotation/
+│   │   ├── augmentation/
+│   │   ├── splitting/
+│   │   ├── validation/
+│   │   └── utils/
+│   │
+│   ├── restoration/                 <-- BỔ SUNG: Phục vụ nhiệm vụ của Sĩ Nguyên
+│   │   ├── __init__.py
+│   │   └── opencv_baseline.py       <-- Cài đặt cấu hình cơ sở xử lý ảnh truyền thống
+│   │
+│   └── metrics/                     <-- BỔ SUNG: Phục vụ nhiệm vụ của Thúy An
+│       ├── __init__.py
+│       ├── image_metrics.py         <-- Hàm tính PSNR, SSIM
+│       ├── text_metrics.py          <-- Hàm tính CER, WER
+│       └── struct_metrics.py        <-- Hàm tính F1-Score, TEDS
+│
+├── scripts/
+│   ├── 01_prepare_raw_data.py
+│   ├── 02_normalize_datasets.py
+│   ├── 03_generate_annotations.py
+│   ├── 04_validate_annotations.py
+│   ├── 05_generate_degraded_pairs.py
+│   ├── 06_create_splits.py
+│   └── 07_validate_dataset.py
+│
+├── notebooks/
+│   ├── 01_dataset_exploration.ipynb
+│   ├── 02_image_quality_analysis.ipynb
+│   └── 03_annotation_analysis.ipynb
+│
+├── tests/
+│   ├── test_schema.py
+│   ├── test_normalization.py
+│   ├── test_augmentation.py
+│   └── test_splitting.py
+│
+└── reports/
+    ├── dataset_statistics/
+    └── data_quality/

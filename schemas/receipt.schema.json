@@ -1,0 +1,517 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Receipt Annotation Schema",
+  "description": "Canonical schema for Vietnamese and English receipt images used in the receipt restoration and multimodal information extraction project.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "sample_id",
+    "source",
+    "document",
+    "annotations",
+    "ocr",
+    "quality",
+    "project_split",
+    "annotation_meta"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "sample_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "required": ["dataset", "source_id", "source_split", "group_id"],
+      "properties": {
+        "dataset": {
+          "type": "string",
+          "enum": ["mc_ocr_2021", "cord", "sroie", "uit_mlreceipts"]
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_split": {
+          "type": ["string", "null"]
+        },
+        "group_id": {
+          "type": ["string", "null"],
+          "description": "Store, merchant, or receipt-template group used to prevent data leakage during splitting."
+        }
+      },
+      "additionalProperties": false
+    },
+    "document": {
+      "type": "object",
+      "required": ["language", "currency", "images"],
+      "properties": {
+        "language": {
+          "type": "string",
+          "enum": ["vi", "en", "mixed"]
+        },
+        "currency": {
+          "type": ["string", "null"],
+          "description": "ISO 4217 currency code when known, for example VND or USD."
+        },
+        "images": {
+          "type": "object",
+          "required": ["original", "degraded", "restored"],
+          "properties": {
+            "original": {
+              "$ref": "#/$defs/imageFile"
+            },
+            "degraded": {
+              "oneOf": [
+                { "$ref": "#/$defs/imageFile" },
+                { "type": "null" }
+              ]
+            },
+            "restored": {
+              "oneOf": [
+                { "$ref": "#/$defs/imageFile" },
+                { "type": "null" }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "type": "object",
+      "description": "The ten label fields are four header fields, four item-level fields repeated for each row, and two summary fields.",
+      "required": [
+        "store_name",
+        "store_address",
+        "transaction_datetime",
+        "receipt_number",
+        "items",
+        "discount_or_tax",
+        "total_amount"
+      ],
+      "properties": {
+        "store_name": {
+          "$ref": "#/$defs/stringField"
+        },
+        "store_address": {
+          "$ref": "#/$defs/stringField"
+        },
+        "transaction_datetime": {
+          "$ref": "#/$defs/stringField",
+          "description": "Use normalized ISO 8601 text in value when the date/time can be determined; preserve the visible text in raw_text."
+        },
+        "receipt_number": {
+          "$ref": "#/$defs/stringField"
+        },
+        "items": {
+          "$ref": "#/$defs/itemCollection"
+        },
+        "discount_or_tax": {
+          "$ref": "#/$defs/discountTaxField"
+        },
+        "total_amount": {
+          "$ref": "#/$defs/numberField"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ocr": {
+      "type": "object",
+      "required": ["engine", "engine_version", "tokens"],
+      "properties": {
+        "engine": {
+          "type": ["string", "null"]
+        },
+        "engine_version": {
+          "type": ["string", "null"]
+        },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ocrToken"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "quality": {
+      "type": "object",
+      "required": ["difficulty"],
+      "properties": {
+        "difficulty": {
+          "oneOf": [
+            { "$ref": "#/$defs/difficulty" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "project_split": {
+      "type": ["string", "null"],
+      "enum": ["train", "validation", "test", null]
+    },
+    "annotation_meta": {
+      "type": "object",
+      "required": [
+        "annotation_status",
+        "annotator_id",
+        "reviewer_id",
+        "updated_at"
+      ],
+      "properties": {
+        "annotation_status": {
+          "type": "string",
+          "enum": ["draft", "reviewed", "final"]
+        },
+        "annotator_id": {
+          "type": ["string", "null"]
+        },
+        "reviewer_id": {
+          "type": ["string", "null"]
+        },
+        "updated_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "bbox": {
+      "type": "array",
+      "description": "Pixel coordinates [x_min, y_min, x_max, y_max] on the image version referenced by the annotation.",
+      "prefixItems": [
+        { "type": "number", "minimum": 0 },
+        { "type": "number", "minimum": 0 },
+        { "type": "number", "minimum": 0 },
+        { "type": "number", "minimum": 0 }
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "imageFile": {
+      "type": "object",
+      "required": ["path", "width", "height"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "fieldBase": {
+      "type": "object",
+      "required": ["status", "value", "raw_text", "bbox"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["annotated", "not_present", "not_evaluable", "pending"]
+        },
+        "value": {},
+        "raw_text": {
+          "type": ["string", "null"]
+        },
+        "bbox": {
+          "oneOf": [
+            { "$ref": "#/$defs/bbox" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": { "const": "annotated" }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "value": { "not": { "type": "null" } }
+            }
+          },
+          "else": {
+            "properties": {
+              "value": { "type": "null" },
+              "raw_text": { "type": "null" },
+              "bbox": { "type": "null" }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "stringField": {
+      "allOf": [
+        { "$ref": "#/$defs/fieldBase" },
+        {
+          "properties": {
+            "value": {
+              "type": ["string", "null"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": { "const": "annotated" }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      ]
+    },
+    "numberField": {
+      "allOf": [
+        { "$ref": "#/$defs/fieldBase" },
+        {
+          "properties": {
+            "value": {
+              "type": ["number", "null"],
+              "minimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "discountTaxEntry": {
+      "type": "object",
+      "required": ["type", "value", "unit", "raw_text", "bbox"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["discount", "tax", "other"]
+        },
+        "value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["amount", "percent"]
+        },
+        "raw_text": {
+          "type": ["string", "null"]
+        },
+        "bbox": {
+          "oneOf": [
+            { "$ref": "#/$defs/bbox" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "discountTaxField": {
+      "allOf": [
+        { "$ref": "#/$defs/fieldBase" },
+        {
+          "properties": {
+            "value": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/discountTaxEntry" }
+                },
+                { "type": "null" }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": { "const": "annotated" }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "$ref": "#/$defs/discountTaxEntry" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "itemRow": {
+      "type": "object",
+      "required": [
+        "row_id",
+        "item_name",
+        "quantity",
+        "unit_price",
+        "line_total"
+      ],
+      "properties": {
+        "row_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "item_name": {
+          "$ref": "#/$defs/stringField"
+        },
+        "quantity": {
+          "$ref": "#/$defs/numberField"
+        },
+        "unit_price": {
+          "$ref": "#/$defs/numberField"
+        },
+        "line_total": {
+          "$ref": "#/$defs/numberField"
+        }
+      },
+      "additionalProperties": false
+    },
+    "itemCollection": {
+      "type": "object",
+      "required": ["status", "rows"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["annotated", "not_present", "not_evaluable", "pending"]
+        },
+        "rows": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": { "$ref": "#/$defs/itemRow" }
+            },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": { "const": "annotated" }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "rows": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "$ref": "#/$defs/itemRow" }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": { "const": "not_present" }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "rows": {
+                "type": "array",
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": { "enum": ["not_evaluable", "pending"] }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "rows": { "type": "null" }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "ocrToken": {
+      "type": "object",
+      "required": ["text", "bbox", "confidence"],
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "bbox": {
+          "$ref": "#/$defs/bbox"
+        },
+        "confidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "difficulty": {
+      "type": "object",
+      "required": ["level", "score", "criteria"],
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"]
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        },
+        "criteria": {
+          "type": "object",
+          "required": ["geometry", "illumination", "text_clarity"],
+          "properties": {
+            "geometry": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "illumination": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "text_clarity": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
