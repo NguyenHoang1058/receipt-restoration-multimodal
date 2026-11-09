@@ -1,4 +1,6 @@
-opencv-python==4.6.0.66
+numpy==1.26.4
+opencv-python==4.10.0.84
 scikit-image==0.21.0
 augraphy==8.2.3
 datasets[vision]==2.18.0
+jsonschema>=4.20,<5

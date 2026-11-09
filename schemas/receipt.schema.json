@@ -29,7 +29,7 @@
       "properties": {
         "dataset": {
           "type": "string",
-          "enum": ["mc_ocr_2021", "cord", "sroie", "uit_mlreceipts"]
+          "enum": ["mc_ocr_2021", "cord", "sroie"]
         },
         "source_id": {
           "type": "string",

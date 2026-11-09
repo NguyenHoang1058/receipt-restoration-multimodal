@@ -17,8 +17,7 @@ receipt-restoration-multimodal/
 │   ├── raw/
 │   │   ├── mc_ocr_2021/
 │   │   ├── cord/
-│   │   ├── sroie/
-│   │   └── uit_mlreceipts/
+│   │   └── sroie/
 │   │
 │   ├── interim/
 │   ├── annotations/
